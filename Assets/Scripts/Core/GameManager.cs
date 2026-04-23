@@ -50,5 +50,15 @@ public class GameManager : MonoBehaviour
         Debug.Log("Game Over");
         currentState = GameState.GameOver;
     }
+    public void StartGame()
+    {
+        currentState=GameState.Playing;
+        Time.timeScale = 1f;
+    }
+    public void ResumeGame()
+    {
+        currentState=GameState.Playing;
+        Time.timeScale = 1f;
+    }
     
 }
