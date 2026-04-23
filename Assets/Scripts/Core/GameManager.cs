@@ -18,9 +18,24 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        switch (currentState)
         {
-            PauseGame();
+            case GameState.MainMenu:
+            Debug.Log("Main Menu");
+            break;
+            case GameState.Playing:
+            Debug.Log("Playing");
+            break;
+            case GameState.Paused:
+            Time.timeScale = 0f;
+            Debug.Log("Paused");
+            break;
+            case GameState.GameOver:
+            Debug.Log("Game Over");
+            break;
+            default:
+            Debug.Log("Unknown State");
+            break;
         }
     }
 
@@ -35,4 +50,5 @@ public class GameManager : MonoBehaviour
         Debug.Log("Game Over");
         currentState = GameState.GameOver;
     }
+    
 }
