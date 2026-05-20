@@ -26,10 +26,16 @@ public class BulletPool : MonoBehaviour
         }
         // Atur instance statis ke objek ini
         Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     void Start()
     {
+        if (bulletPrefab==null)
+        {
+            Debug.LogError("Bullet prefab is not assigned in BulletPool!");
+            return;
+        }
         // Inisialisasi pool saat game dimulai
         InitializePool();
     }
@@ -44,7 +50,7 @@ public class BulletPool : MonoBehaviour
         for (int i = 0; i < initialPoolSize; i++)
         {
             // Clone peluru dari prefab
-            GameObject bullet = Instantiate(bulletPrefab);
+            GameObject bullet = Instantiate(bulletPrefab, transform);
             // Nonaktifkan peluru saat dibuat (jangan tampilkan di layar)
             bullet.SetActive(false);
             // Berikan nama untuk memudahkan debugging
@@ -81,7 +87,7 @@ public class BulletPool : MonoBehaviour
         else
         {
             // Jika pool kosong, buat peluru baru
-            bullet = Instantiate(bulletPrefab);
+            bullet = Instantiate(bulletPrefab, transform);
             Bullet bulletScript = bullet.GetComponent<Bullet>();
             if (bulletScript != null)
             {
@@ -102,6 +108,10 @@ public class BulletPool : MonoBehaviour
 
     public void ReturnBullet(GameObject bullet)
     {
+        if (availableBullets.Contains(bullet))
+        {
+            return;
+        }
         // Nonaktifkan peluru (sembunyikan dari layar)
         bullet.SetActive(false);
         // Masukkan kembali ke antrian untuk digunakan lagi

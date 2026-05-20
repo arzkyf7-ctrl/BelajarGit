@@ -1,39 +1,35 @@
 using UnityEngine;
+using System.Collections; // Tambahkan system.collections untuk menggunakan IEnumerator
 
 public class Bullet : MonoBehaviour
 {
     public float speed = 10f;
     private Rigidbody2D rb;
     private Vector3 direction;
-    // Referensi ke pool peluru (newly added)
     private BulletPool pool;
-    // Waktu hidup maksimal peluru dalam detik (newly added)
-    private float lifetime = 5f;
-    // Waktu yang telah berlalu sejak peluru dibuat (newly added)
-    private float elapsedTime = 0f;
+
+    void OnEnable()
+    {
+        // Setiap kali peluru muncul, 5 detik kemudian akan otomatis dinonaktifkan jika belum mengenai apa-apa
+        StartCoroutine(DeactivateRoutine());
+    }
+
+    IEnumerator DeactivateRoutine()
+    {
+        yield return new WaitForSeconds(5f);
+        ReturnToPool();
+    }
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        // Reset waktu yang berlalu saat peluru aktif (newly added)
-        elapsedTime = 0f;
+        Debug.Log($"Bullet spawned with speed: {speed}, direction: {direction}");
+        // Destroy bullet after 5 seconds if it hasn't been destroyed already
+        // Destroy(gameObject, 5f);
     }
 
     void Update()
     {
-        // Tambahkan waktu yang telah berlalu (newly added)
-        elapsedTime += Time.deltaTime;
-        
-        // Jika peluru sudah melampaui lifetime, kembalikan ke pool (newly added)
-        if (elapsedTime > lifetime)
-        {
-            if (pool != null)
-            {
-                pool.ReturnBullet(gameObject);
-            }
-            return;
-        }
-
         if (rb != null)
         {
             // Move using Rigidbody2D
@@ -45,29 +41,30 @@ public class Bullet : MonoBehaviour
             transform.position += direction * speed * Time.deltaTime;
         }
     }
-
+    public void SetPool(BulletPool bulletPool)
+    {
+        pool = bulletPool;
+    }
     public void SetDirection(Vector3 newDirection)
     {
         direction = newDirection.normalized;
         Debug.Log($"Bullet SetDirection called with: {newDirection}, normalized: {direction}");
     }
 
-    // Simpan referensi ke pool untuk nanti dikembalikan (newly added)
-    public void SetPool(BulletPool bulletPool)
-    {
-        pool = bulletPool;
-    }
-
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // Jika peluru menabrak sesuatu (selain peluru lain), kembalikan ke pool (newly added)
-        if (!collision.CompareTag("Bullet"))
+        // Destroy bullet on collision
+        Debug.Log("Bullet hit: " + collision.gameObject.name);
+        // Destroy(gameObject);
+        // Nonaktifkan peluru jika mengenai sesuatu, dan kembalikan ke pool
+        ReturnToPool();
+    }
+
+    private void ReturnToPool()
+    {
+        if (pool != null)
         {
-            Debug.Log("Bullet hit: " + collision.gameObject.name);
-            if (pool != null)
-            {
-                pool.ReturnBullet(gameObject);
-            }
+            pool.ReturnBullet(gameObject);
         }
     }
 }
